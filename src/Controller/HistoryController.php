@@ -19,7 +19,7 @@ class HistoryController extends AbstractController
     {
         $this->historyRepository = $historyRepository;
     }
-    #[Route('/exchange/values', name: 'app_exchange')]
+    #[Route('/exchange/values', name: 'app_exchange', methods: ['POST'])]
     public function exchangeValues(Request $request, SerializerInterface $serializer): JsonResponse
     {
 
