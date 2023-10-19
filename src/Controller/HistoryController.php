@@ -14,18 +14,21 @@ use Symfony\Component\Serializer\SerializerInterface;
 class HistoryController extends AbstractController
 {
     private HistoryRepository $historyRepository;
+    private SerializerInterface $serializer;
 
-    public function __construct(HistoryRepository $historyRepository)
+
+    public function __construct(HistoryRepository $historyRepository, SerializerInterface $serializer)
     {
         $this->historyRepository = $historyRepository;
+        $this->serializer = $serializer;
     }
     #[Route('/exchange/values', name: 'app_exchange', methods: ['POST'])]
-    public function exchangeValues(Request $request, SerializerInterface $serializer): JsonResponse
+    public function exchangeValues(Request $request): JsonResponse
     {
 
         $data = $request->getContent();
         try {
-            $inputData = $serializer->deserialize($data, ExchangeValue::class, 'json');
+            $inputData = $this->serializer->deserialize($data, ExchangeValue::class, 'json');
         } catch (\Exception $e) {
             return new JsonResponse(['errors' => ['message' => 'Validation error.']], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
@@ -34,4 +37,15 @@ class HistoryController extends AbstractController
 
         return new JsonResponse($result);
     }
+
+    #[Route('/exchange/history', name: 'app_exchange_history', methods: ['GET'])]
+    public function showHistory(): JsonResponse
+    {
+       $data = $this->historyRepository->getAll();
+       $data = $this->serializer->serialize($data, 'json');
+
+       return new JsonResponse($data, Response::HTTP_OK, [], true);
+    }
+
+
 }

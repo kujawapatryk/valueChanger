@@ -15,22 +15,19 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method History[]    findAll()
  * @method History[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class HistoryRepository
+class HistoryRepository extends ServiceEntityRepository
 {
-    private EntityManagerInterface $entityManager;
-
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(ManagerRegistry $registry)
     {
-        $this->entityManager = $entityManager;
+        parent::__construct($registry, History::class);
     }
-
     public function exchangeAndSave(int $first, int $second): array
     {
         $history = new History();
         $history->setFirstIn($first);
         $history->setSecondIn($second);
-        $this->entityManager->persist($history);
-        $this->entityManager->flush();
+        $this->_em->persist($history);
+        $this->_em->flush();
 
         $first = $first + $second;
         $second = $first - $second;
@@ -38,9 +35,14 @@ class HistoryRepository
 
         $history->setFirstOut($first);
         $history->setSecondOut($second);
-        $this->entityManager->flush();
+        $this->_em->flush();
 
         return ['first' => $first, 'second' => $second];
+    }
+
+    public function getAll(): array
+    {
+        return $this->findAll();
     }
 
 }
