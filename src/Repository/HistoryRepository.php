@@ -4,7 +4,6 @@ namespace App\Repository;
 
 use App\Entity\History;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -40,9 +39,19 @@ class HistoryRepository extends ServiceEntityRepository
         return ['first' => $first, 'second' => $second];
     }
 
-    public function getAll(): array
+    public function getAll()
     {
         return $this->findAll();
+    }
+
+    public function getPaginatedHistory(string $sort, string $direction, int $page, int $limit): array
+    {
+        $queryBuilder = $this->createQueryBuilder('h')
+            ->orderBy('h.' . $sort, $direction)
+            ->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit);
+
+        return $queryBuilder->getQuery()->getResult();
     }
 
 }
